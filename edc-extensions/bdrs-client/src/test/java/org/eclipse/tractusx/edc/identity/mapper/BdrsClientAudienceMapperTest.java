@@ -1,5 +1,6 @@
 /********************************************************************************
  * Copyright (c) 2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+ * Copyright (c) 2025 Cofinity-X GmbH
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -31,9 +32,17 @@ class BdrsClientAudienceMapperTest {
 
     private final BdrsClient bdrsClient = mock();
     private final BdrsClientAudienceMapper clientAudienceMapper = new BdrsClientAudienceMapper(bdrsClient);
+    
+    @Test
+    void shouldReturnDid_whenCounterPartyIdIsDid() {
+        var counterPartyId = "did:web:did1";
+        var did = clientAudienceMapper.resolve(new TestMessage(counterPartyId));
+        
+        assertThat(did).isSucceeded().isEqualTo(counterPartyId);
+    }
 
     @Test
-    void shouldReturnDid() {
+    void shouldReturnDid_whenCounterPartyIdIsBpn() {
         when(bdrsClient.resolve("bpn1")).thenReturn("did:web:did1");
 
         var did = clientAudienceMapper.resolve(new TestMessage("bpn1"));
@@ -42,7 +51,7 @@ class BdrsClientAudienceMapperTest {
     }
 
     @Test
-    void shouldFail_whenResolutionFails() {
+    void shouldFailForBpn_whenResolutionFails() {
         when(bdrsClient.resolve("bpn1")).thenReturn(null);
 
         var did = clientAudienceMapper.resolve(new TestMessage("bpn1"));
@@ -51,7 +60,7 @@ class BdrsClientAudienceMapperTest {
     }
 
     @Test
-    void shouldFail_whenResolutionThrowsException() {
+    void shouldFailForBpn_whenResolutionThrowsException() {
         when(bdrsClient.resolve("bpn1")).thenThrow(new RuntimeException("exception"));
 
         var did = clientAudienceMapper.resolve(new TestMessage("bpn1"));
@@ -59,7 +68,7 @@ class BdrsClientAudienceMapperTest {
         assertThat(did).isFailed().detail().contains("exception");
     }
 
-    private record TestMessage(String bpn) implements RemoteMessage {
+    private record TestMessage(String counterPartyId) implements RemoteMessage {
         @Override
         public String getProtocol() {
             return "test-proto";
@@ -72,7 +81,7 @@ class BdrsClientAudienceMapperTest {
 
         @Override
         public String getCounterPartyId() {
-            return bpn;
+            return counterPartyId;
         }
     }
 }
