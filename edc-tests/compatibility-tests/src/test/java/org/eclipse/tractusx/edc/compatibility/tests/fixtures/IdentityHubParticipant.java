@@ -64,14 +64,6 @@ public class IdentityHubParticipant {
         return ConfigFactory.fromMap(settings);
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
     public LazySupplier<URI> getSts() {
         return sts;
     }

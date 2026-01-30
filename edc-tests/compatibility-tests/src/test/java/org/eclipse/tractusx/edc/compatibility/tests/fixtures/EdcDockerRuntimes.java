@@ -39,7 +39,7 @@ public enum EdcDockerRuntimes {
         return new GenericContainer<>(image)
                 .withCreateContainerCmdModifier(cmd -> cmd.withName(name))
                 .withNetworkMode("host")
-                .withLogConsumer(it -> System.out.println("[%s] %s".formatted(name, it.getUtf8StringWithoutLineEnding())))
+                .withLogConsumer(it -> System.out.printf("[%s] %s%n", name, it.getUtf8StringWithoutLineEnding()))
                 .waitingFor(Wait.forLogMessage(".*Runtime .* ready.*", 1))
                 .withEnv(env);
     }
